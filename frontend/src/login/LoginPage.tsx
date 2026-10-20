@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router"
 
-import { api, setToken } from "../common/api"
+import { api } from "../common/api"
 
 function LoginPage() {
     const navigate = useNavigate()
@@ -16,8 +16,7 @@ function LoginPage() {
         try {
             const creds = { username, password }
             if (mode === "register") await api("POST", "/auth/register", creds)
-            const { access_token } = await api("POST", "/auth/login", creds)
-            setToken(access_token)
+            await api("POST", "/auth/login", creds)
             navigate("/characters")
         } catch (err) {
             setError((err as Error).message)

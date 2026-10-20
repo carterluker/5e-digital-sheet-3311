@@ -1,13 +1,13 @@
-import { Link, useNavigate } from "react-router"
+import { Link, useLocation, useNavigate } from "react-router"
 
-import { api, getToken, setToken } from "../api"
+import { api } from "../api"
 
 function Header() {
     const navigate = useNavigate()
+    const onLogin = useLocation().pathname === "/login"
 
     async function logout() {
         await api("POST", "/auth/logout").catch(() => {})
-        setToken(null)
         navigate("/login")
     }
 
@@ -16,7 +16,7 @@ function Header() {
             <h1>5.5e Digital Character Sheet</h1>
             <nav>
                 <Link to="/characters">Characters</Link>{" "}
-                {getToken() && <button onClick={logout}>Log out</button>}
+                {!onLogin && <button onClick={logout}>Log out</button>}
             </nav>
             <hr></hr>
         </header>

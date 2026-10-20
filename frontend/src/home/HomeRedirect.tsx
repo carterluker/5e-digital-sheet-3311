@@ -1,11 +1,9 @@
 import { Navigate } from "react-router"
 
-import { getToken } from "../common/api"
-
 function HomeRedirect() {
-    // Rendered client-side only (SPA mode), so localStorage is available.
+    // The session cookie is HttpOnly, so auth state isn't visible here; /characters redirects to /login on 401.
     return(
-        <Navigate to={getToken() ? "/characters" : "/login"} replace />
+        <Navigate to={"/characters"} replace />
     )
 }
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router"
 
-import { ApiError, api, getToken, setToken, type Character, type Summary } from "../common/api"
+import { ApiError, api, type Character, type Summary } from "../common/api"
 
 function CharacterListPage() {
     const navigate = useNavigate()
@@ -11,13 +11,11 @@ function CharacterListPage() {
 
     function fail(err: unknown) {
         if (err instanceof ApiError && err.status === 401) {
-            setToken(null)
             navigate("/login")
         } else setError((err as Error).message)
     }
 
     useEffect(() => {
-        if (!getToken()) return void navigate("/login")
         api<Summary[]>("GET", "/characters").then(setChars).catch(fail)
     }, [])
 

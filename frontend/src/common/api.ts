@@ -1,4 +1,4 @@
-// Thin wrapper around the backend REST API. The token lives in localStorage.
+// Thin wrapper around the backend REST API. The session lives in an HttpOnly cookie set by the server.
 
 export type Abilities = Record<string, number>
 export type Item = {
@@ -47,10 +47,6 @@ export class ApiError extends Error {
     }
 }
 
-const TOKEN_KEY = "token"
-export const getToken = () => localStorage.getItem(TOKEN_KEY)
-export const setToken = (t: string | null) => (t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY))
-
 function errorText(body: any, fallback: string): string {
     const d = body?.detail
     if (typeof d === "string") return d
@@ -59,12 +55,10 @@ function errorText(body: any, fallback: string): string {
 }
 
 export async function api<T = any>(method: string, path: string, body?: unknown): Promise<T> {
-    const token = getToken()
     const res = await fetch(`/api${path}`, {
         method,
         headers: {
             ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: body !== undefined ? JSON.stringify(body) : undefined,
     })

@@ -3,8 +3,7 @@ import hmac
 import secrets
 from datetime import timedelta
 
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi import Cookie, Depends, HTTPException, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -12,6 +11,7 @@ from .config import settings
 from .db import get_db
 from .models import AuthToken, User, as_utc, utcnow
 
+SESSION_COOKIE = "session"
 _SCRYPT = dict(n=2**14, r=8, p=1, dklen=32)
 
 
@@ -35,7 +35,7 @@ def _hash_token(token: str) -> str:
 
 
 def issue_token(db: Session, user: User) -> str:
-    """Create an opaque bearer token. Only its hash is stored."""
+    """Create an opaque session token. Only its hash is stored."""
     token = secrets.token_urlsafe(32)
     db.add(
         AuthToken(
@@ -53,22 +53,33 @@ def revoke_token(db: Session, token: str) -> None:
         db.delete(row)
 
 
-_bearer = HTTPBearer(auto_error=False)
+def set_session_cookie(response: Response, token: str) -> None:
+    response.set_cookie(
+        SESSION_COOKIE,
+        token,
+        max_age=settings.session_ttl_hours * 3600,
+        path="/api",
+        httponly=True,
+        secure=settings.cookie_secure,
+        samesite="lax",
+    )
 
 
-def bearer_token(creds: HTTPAuthorizationCredentials | None = Depends(_bearer)) -> str:
-    if creds is None:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Not authenticated", {"WWW-Authenticate": "Bearer"})
-    return creds.credentials
+def clear_session_cookie(response: Response) -> None:
+    response.delete_cookie(SESSION_COOKIE, path="/api", httponly=True, secure=settings.cookie_secure, samesite="lax")
 
 
-def current_user(token: str = Depends(bearer_token), db: Session = Depends(get_db)) -> User:
+def session_token(token: str | None = Cookie(default=None, alias=SESSION_COOKIE)) -> str:
+    if token is None:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Not authenticated")
+    return token
+
+
+def current_user(token: str = Depends(session_token), db: Session = Depends(get_db)) -> User:
     row = db.get(AuthToken, _hash_token(token))
-    if row is None or as_utc(row.expires_at) < utcnow():
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or expired token", {"WWW-Authenticate": "Bearer"})
-    user = db.get(User, row.user_id)
+    user = db.get(User, row.user_id) if row and as_utc(row.expires_at) >= utcnow() else None
     if user is None:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or expired token", {"WWW-Authenticate": "Bearer"})
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or expired session")
     return user
 
 

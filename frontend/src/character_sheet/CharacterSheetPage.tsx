@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router"
 
-import { ApiError, api, getToken, setToken, type Backup, type Character, type Item, type Sheet } from "../common/api"
+import { ApiError, api, type Backup, type Character, type Item, type Sheet } from "../common/api"
 import { ALIGNMENTS, BACKGROUNDS, CLASSES, RACES, SUBCLASSES } from "../common/options"
 
 type Action = { type: string; [key: string]: unknown }
@@ -65,7 +65,6 @@ function CharacterSheetPage() {
 
     function fail(err: unknown) {
         if (err instanceof ApiError && err.status === 401) {
-            setToken(null)
             navigate("/login")
         } else if (err instanceof ApiError && err.status === 409) {
             conflictRef.current = true
@@ -101,7 +100,6 @@ function CharacterSheetPage() {
     }
 
     useEffect(() => {
-        if (!getToken()) return void navigate("/login")
         load()
         return () => window.clearTimeout(timer.current)
     }, [id])

@@ -17,7 +17,7 @@ Interactive docs at http://localhost:8000/docs. Tests (SQLite in-memory, no Post
 
 | Area | Endpoints |
 |---|---|
-| Auth (bearer token) | `POST /api/auth/register`, `/login`, `/logout`, `GET /me` |
+| Auth (HttpOnly session cookie) | `POST /api/auth/register`, `/login`, `/logout`, `GET /me` |
 | Characters | `GET/POST /api/characters`, `GET/PUT/DELETE /api/characters/{id}` |
 | Autosave | `PUT /api/characters/{id}` with `{version, data, layout?}`; 409 on stale version |
 | Backups | `GET/POST /{id}/backups`, `GET /{id}/backups/{bid}`, `POST /{id}/backups/{bid}/restore` |

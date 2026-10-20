@@ -1,10 +1,12 @@
+from datetime import timedelta
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app import actions
+from app import actions, security
 from app.config import settings
 from app.db import Base, get_db
 from app.main import app
@@ -27,8 +29,8 @@ def client():
 
 def auth_headers(client, username="alice", password="password123"):
     client.post("/api/auth/register", json={"username": username, "password": password})
-    token = client.post("/api/auth/login", json={"username": username, "password": password}).json()["access_token"]
-    return {"Authorization": f"Bearer {token}"}
+    token = client.post("/api/auth/login", json={"username": username, "password": password}).cookies["session"]
+    return {"Cookie": f"session={token}"}
 
 
 @pytest.fixture()
@@ -70,8 +72,11 @@ def test_auth_flow(client):
     assert client.post("/api/auth/register", json={"username": "x", "password": "short"}).status_code == 422
     assert client.post("/api/auth/login", json={"username": "bob", "password": "wrong-password"}).status_code == 401
     assert client.post("/api/auth/login", json={"username": "nobody", "password": "wrong-password"}).status_code == 401
-    token = client.post("/api/auth/login", json={"username": "BOB", "password": "hunter2hunter2"}).json()["access_token"]
-    hdr = {"Authorization": f"Bearer {token}"}
+    r = client.post("/api/auth/login", json={"username": "BOB", "password": "hunter2hunter2"})
+    assert r.json()["username"] == "bob"
+    flags = r.headers["set-cookie"].lower()
+    assert "httponly" in flags and "samesite=lax" in flags and "path=/api" in flags
+    hdr = {"Cookie": f"session={r.cookies['session']}"}
     assert client.get("/api/auth/me", headers=hdr).json()["username"] == "bob"
     assert client.post("/api/auth/logout", headers=hdr).status_code == 204
     assert client.get("/api/auth/me", headers=hdr).status_code == 401
@@ -79,13 +84,14 @@ def test_auth_flow(client):
 
 def test_requires_auth(client):
     assert client.get("/api/characters").status_code == 401
-    assert client.get("/api/characters", headers={"Authorization": "Bearer nope"}).status_code == 401
+    assert client.get("/api/characters", headers={"Cookie": "session=nope"}).status_code == 401
 
 
 def test_expired_token(client, h, monkeypatch):
-    monkeypatch.setattr(settings, "session_ttl_hours", -1)
-    t = client.post("/api/auth/login", json={"username": "alice", "password": "password123"}).json()["access_token"]
-    assert client.get("/api/auth/me", headers={"Authorization": f"Bearer {t}"}).status_code == 401
+    assert client.get("/api/auth/me", headers=h).status_code == 200
+    later = security.utcnow() + timedelta(hours=settings.session_ttl_hours + 1)
+    monkeypatch.setattr(security, "utcnow", lambda: later)
+    assert client.get("/api/auth/me", headers=h).status_code == 401
 
 
 # ---------------------------------------------------------- characters
