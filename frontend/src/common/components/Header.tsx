@@ -13,7 +13,7 @@ function Header() {
 
     return(
         <header>
-            <h1>Carter's Digital Character Sheet</h1>
+            <h1>5.5e Digital Character Sheet</h1>
             <nav>
                 <Link to="/characters">Characters</Link>{" "}
                 {getToken() && <button onClick={logout}>Log out</button>}

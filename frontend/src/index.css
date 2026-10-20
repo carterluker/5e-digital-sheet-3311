@@ -1,7 +1,91 @@
-body { font-family: sans-serif; margin: 1rem auto; max-width: 60rem; padding: 0 1rem; }
-table { border-collapse: collapse; }
-td, th { border: 1px solid #aaa; padding: 2px 6px; text-align: left; }
+:root {
+  --bg: #f1f4f7;
+  --surface: #ffffff;
+  --text: #1f2a37;
+  --muted: #5b6b7c;
+  --border: #d3dae2;
+  --accent: #3d5a80;
+  --accent-hover: #2f4764;
+  --head: #e6ebf1;
+  --error: #b3392f;
+  --warning: #8a6a1f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161b22;
+    --surface: #1e252e;
+    --text: #e2e8ef;
+    --muted: #93a1b1;
+    --border: #38424e;
+    --accent: #7a9cc6;
+    --accent-hover: #93b2d6;
+    --head: #28313c;
+    --error: #ef8a80;
+    --warning: #d9b45f;
+  }
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  margin: 0 auto;
+  max-width: 60rem;
+  padding: 1rem;
+}
+
+h1, h2, h3 { color: var(--accent); margin: 0.5rem 0; }
+h1 { font-size: 1.5rem; }
+hr { border: 0; border-top: 1px solid var(--border); margin: 0.75rem 0 1rem; }
+a { color: var(--accent); }
+
+fieldset {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin: 0 0 1rem;
+  padding: 0.5rem 1rem 1rem;
+}
+legend { color: var(--accent); font-weight: 600; padding: 0 0.4rem; }
+
+table { border-collapse: collapse; background: var(--surface); }
+th, td { border: 1px solid var(--border); padding: 4px 8px; text-align: left; }
+th { background: var(--head); font-weight: 600; }
+
+input, select, textarea {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font: inherit;
+  padding: 3px 6px;
+}
+input:focus, select:focus, textarea:focus, button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
 input[type="number"] { width: 5rem; }
-fieldset { margin-bottom: 1rem; }
-.error { color: #b00; }
-.warning { color: #960; }
+input[type="checkbox"] { accent-color: var(--accent); }
+
+button {
+  background: var(--accent);
+  border: 0;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  padding: 3px 10px;
+}
+button:hover:not(:disabled) { background: var(--accent-hover); }
+button:disabled { opacity: 0.45; cursor: default; }
+
+nav { align-items: center; display: flex; gap: 1rem; }
+
+.login { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; max-width: 22rem; margin: 2rem auto; padding: 0.5rem 1.5rem 1.5rem; }
+.login div { margin-bottom: 0.5rem; }
+.login label { display: block; color: var(--muted); }
+
+.error { color: var(--error); }
+.warning { color: var(--warning); }
