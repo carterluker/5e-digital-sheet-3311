@@ -4,7 +4,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from .config import settings
-from .db import get_db
+# from db import get_db
 
 app = FastAPI(title="5e Digital Character Sheet")
 
@@ -15,8 +15,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+'''
 @app.get("/api/health")
 def health(db: Session = Depends(get_db)) -> dict:
     db.execute(text("SELECT 1"))
     return {"status": "ok", "db": True}
+'''
