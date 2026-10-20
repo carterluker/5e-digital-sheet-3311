@@ -1,14 +1,14 @@
 import Header from './common/components/Header.tsx'
 
-import LoginBox from './login/components/Login.tsx';
+import Login from './login/components/Login.tsx';
 
 function App() {
 	return(
-		<body>
+		<>
 			<Header></Header>
 
-			<LoginBox></LoginBox>
-		</body>
+			<Login></Login>
+		</>
 		
 	);
 }

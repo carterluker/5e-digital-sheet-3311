@@ -1,6 +1,6 @@
-function LoginBox() {
+function Login() {
     return(
-        <div className="login-box">
+        <div className="login">
             <h2>Log in</h2>
             <form>
                 <label htmlFor="username">Username</label>
@@ -15,4 +15,4 @@ function LoginBox() {
     )
 }
 
-export default LoginBox
+export default Login
