@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router"
 
 import { ApiError, api, getToken, setToken, type Backup, type Character, type Item, type Sheet } from "../common/api"
+import { ALIGNMENTS, BACKGROUNDS, CLASSES, RACES, SUBCLASSES } from "../common/options"
 
 type Action = { type: string; [key: string]: unknown }
 
@@ -17,6 +18,20 @@ function Num({ value, onChange, min }: { value: number; onChange: (n: number) =>
 
 function Txt({ value, onChange, placeholder }: { value: string; onChange: (s: string) => void; placeholder?: string }) {
     return <input type="text" value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
+}
+
+// Dropdown with a blank choice. A stored value outside `options` (homebrew, older data)
+// is kept as an extra option instead of being silently dropped.
+function Pick({ value, options, onChange }: { value: string; options: string[]; onChange: (s: string) => void }) {
+    const known = options.some((o) => o.toLowerCase() === value.toLowerCase())
+    const shown = known ? options.find((o) => o.toLowerCase() === value.toLowerCase())! : value
+    return (
+        <select value={shown} onChange={(e) => onChange(e.target.value)}>
+            <option value="">—</option>
+            {!known && value && <option value={value}>{value}</option>}
+            {options.map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+    )
 }
 
 function CharacterSheetPage() {
@@ -183,12 +198,14 @@ function CharacterSheetPage() {
             <fieldset>
                 <legend>Basics</legend>
                 <label>Name <Txt value={draft.name} onChange={(v) => edit((s) => { s.name = v })} /></label>{" "}
-                <label>Race <Txt value={draft.race} onChange={(v) => edit((s) => { s.race = v })} /></label>{" "}
-                <label>Class <Txt value={draft.character_class} onChange={(v) => edit((s) => { s.character_class = v })} /></label>{" "}
-                <label>Subclass <Txt value={draft.subclass} onChange={(v) => edit((s) => { s.subclass = v })} /></label>
+                <label>Race <Pick value={draft.race} options={RACES} onChange={(v) => edit((s) => { s.race = v })} /></label>{" "}
+                <label>Class <Pick value={draft.character_class} options={CLASSES}
+                    onChange={(v) => edit((s) => { s.character_class = v; s.subclass = "" })} /></label>{" "}
+                <label>Subclass <Pick value={draft.subclass} options={SUBCLASSES[draft.character_class.toLowerCase()] ?? []}
+                    onChange={(v) => edit((s) => { s.subclass = v })} /></label>
                 <br />
-                <label>Background <Txt value={draft.background} onChange={(v) => edit((s) => { s.background = v })} /></label>{" "}
-                <label>Alignment <Txt value={draft.alignment} onChange={(v) => edit((s) => { s.alignment = v })} /></label>{" "}
+                <label>Background <Pick value={draft.background} options={BACKGROUNDS} onChange={(v) => edit((s) => { s.background = v })} /></label>{" "}
+                <label>Alignment <Pick value={draft.alignment} options={ALIGNMENTS} onChange={(v) => edit((s) => { s.alignment = v })} /></label>{" "}
                 <label>Level <Num min={1} value={draft.level} onChange={(v) => edit((s) => { s.level = v })} /></label>{" "}
                 <label>XP <Num min={0} value={draft.experience} onChange={(v) => edit((s) => { s.experience = v })} /></label>{" "}
                 <label><input type="checkbox" checked={draft.inspiration}
