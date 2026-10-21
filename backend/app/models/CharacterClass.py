@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from ModelBase import ModelBase
+from .ModelBase import ModelBase
 
 from typing import List, Optional
 
