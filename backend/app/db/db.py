@@ -1,13 +1,11 @@
 from collections.abc import Iterator
 
+from ..models.ModelBase import ModelBase
+
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 
 from ..config import settings
-
-class ModelBase(DeclarativeBase):
-    """DeclarativeBase subclass for model registry."""
-    pass
 
 engine = create_engine(
     settings.database_url,
@@ -15,16 +13,21 @@ engine = create_engine(
     connect_args={"connect_timeout": settings.database_connect_timeout},
 )
 
-SessionLocal = sessionmaker(bind=engine, autoflush=False)
-
 def create_tables():
     """Creates tables for each model registered under the ModelBase class."""
 
     ModelBase.metadata.create_all(engine)
 
+SessionLocal = sessionmaker(bind=engine, autoflush=False)
 
 def get_db() -> Iterator[Session]:
-    """Opens a yields a database session as a context manager. Does not commit changes."""
-    
+    """Yields a database session, closing it when the caller is done. Does not commit changes.
+
+    This is a GENERATOR, so it must not be called directly (that returns a generator, not a
+    Session). Use it as a FastAPI dependency, which runs it and injects the session:
+
+        def endpoint(db: Session = Depends(get_db)): ...
+    """
+
     with SessionLocal() as session:
         yield session
