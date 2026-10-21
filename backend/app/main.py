@@ -2,8 +2,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
+from .db.db import create_tables, get_db
 
-from .db.db import create_db_and_tables, get_db
+from .models.User import User
+
+from sqlalchemy import select
 
 app = FastAPI(title="5e Digital Character Sheet")
 
@@ -17,13 +20,13 @@ app.add_middleware(
 
 @app.on_event("startup")
 def on_startup():
-    create_db_and_tables()
+    create_tables()
 
 
 @app.get("/api/login/{username},{password}")
 async def login(username: str, password: str) -> str:
     db = get_db()
     try:
-        db.execute()
+        user = db.execute(select(User).where(User.username == username))
     except:
         pass
