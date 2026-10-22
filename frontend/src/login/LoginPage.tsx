@@ -9,7 +9,7 @@ import { useSession } from './SessionContext.tsx'
 import './login.css'
 
 function LoginPage() {
-    const { token, login, createUser } = useSession()
+    const { status, login, createUser } = useSession()
     const navigate = useNavigate()
 
     const [creating, setCreating] = useState(false)
@@ -18,12 +18,12 @@ function LoginPage() {
     const [error, setError] = useState<string | null>(null)
     const [pending, setPending] = useState(false)
 
-    // Check if already logged in (existing session cookie or just authenticated).
+    // Check if already logged in (existing valid session or just authenticated).
     useEffect(() => {
-        if (token) {
+        if (status === 'authenticated') {
             navigate('/characters', { replace: true })
         }
-    }, [token, navigate])
+    }, [status, navigate])
 
     async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
         e.preventDefault()
@@ -48,6 +48,8 @@ function LoginPage() {
                         id="username"
                         label="Username"
                         autoComplete="username"
+                        minLength={creating ? 3 : undefined}
+                        maxLength={creating ? 30 : undefined}
                         value={username}
                         onChange={setUsername}
                     />
@@ -56,6 +58,8 @@ function LoginPage() {
                         label="Password"
                         type="password"
                         autoComplete={creating ? 'new-password' : 'current-password'}
+                        minLength={creating ? 8 : undefined}
+                        maxLength={creating ? 128 : undefined}
                         value={password}
                         onChange={setPassword}
                     />

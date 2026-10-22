@@ -1,12 +1,18 @@
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
 from .db.db import SessionLocal, create_tables, get_db
 
+from .models.User import User
+from .models.UserSession import UserSession
+
 from .schemas.Users import UserLogin, NewUser
 
-from .services.users import login, create_user, setup_default_user
+from .services.users import (
+    login, logout, create_user, setup_default_user, delete_expired_sessions,
+    get_current_session, get_current_user,
+)
 
 from sqlalchemy.orm import Session
 
@@ -26,6 +32,7 @@ def on_startup():
     create_tables()
     with SessionLocal() as db:
         setup_default_user(db)
+        delete_expired_sessions(db)
 
 # --- Users and Login ---
 
@@ -45,4 +52,19 @@ def login_endpoint(user_login: UserLogin, db: Session = Depends(get_db)):
     """Given a username and password, validate the users credentials and return a session token."""
     
     return {"session_token": login(user_login.username, user_login.password, db)}
+
+
+@app.get("/api/me/", tags=["Users"])
+def me_endpoint(user: User = Depends(get_current_user)):
+    """Returns the user that owns the session token given in the Authorization header."""
+
+    return {"username": user.username}
+
+
+@app.post("/api/logout/", status_code=status.HTTP_204_NO_CONTENT, tags=["Users"])
+def logout_endpoint(user_session: UserSession = Depends(get_current_session), db: Session = Depends(get_db)):
+    """Ends the session given in the Authorization header."""
+
+    logout(user_session, db)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 

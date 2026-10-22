@@ -3,8 +3,10 @@ import secrets
 from datetime import datetime, timedelta, timezone
 
 from argon2 import PasswordHasher
+from argon2.exceptions import InvalidHashError, VerifyMismatchError
 
 from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from ..config import settings
 from ..db.db import get_db
@@ -12,9 +14,11 @@ from ..db.db import get_db
 from ..models.User import User
 from ..models.UserSession import UserSession
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session
+
+bearer_scheme = HTTPBearer(auto_error=False)
 
 
 def get_user(username: str, db: Session = Depends(get_db)) -> User | None:
@@ -161,15 +165,15 @@ def login(username: str, password: str, db: Session = Depends(get_db)):
     if (user := get_user(username, db)) is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="No user exists with that username.",
+            detail="Incorrect username or password.",
             headers={"WWW-Authenticate": "Bearer"},
         )
-        
+
     # Password Hashing
     ph = PasswordHasher()
     try:
         ph.verify(user.password_hash, password)
-    except:
+    except (VerifyMismatchError, InvalidHashError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password.",
@@ -181,3 +185,80 @@ def login(username: str, password: str, db: Session = Depends(get_db)):
         update_user_password_hash(username, password, db)
 
     return create_user_session(user.id, db)
+
+
+def get_session(token: str, db: Session = Depends(get_db)) -> UserSession | None:
+    """Retrieves the unexpired UserSession matching the given session token. Expired sessions are deleted. If no valid session exists, None is returned."""
+
+    token_hash = hashlib.sha256(token.encode()).hexdigest()
+
+    try:
+        user_session = db.execute(select(UserSession).where(UserSession.token_hash == token_hash)).scalar_one_or_none()
+        if user_session is not None and user_session.expires_date <= datetime.now(timezone.utc):
+            db.delete(user_session)
+            db.commit()
+            return None
+    except OperationalError:
+        # Database is down or timed out: 503
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The backend database is unavailable."
+        )
+
+    return user_session
+
+
+def get_current_session(
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+    db: Session = Depends(get_db)
+) -> UserSession:
+    """Dependency: the valid session for the request's bearer token. Raises 401 if the token is missing, unknown, or expired."""
+
+    user_session = get_session(credentials.credentials, db) if credentials is not None else None
+    if user_session is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not logged in, or the session has expired.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return user_session
+
+
+def get_current_user(user_session: UserSession = Depends(get_current_session)) -> User:
+    """Dependency: the user that owns the request's valid session token."""
+
+    return user_session.user
+
+
+def logout(user_session: UserSession, db: Session = Depends(get_db)) -> None:
+    """Ends the given session by deleting its UserSession record."""
+
+    try:
+        db.delete(user_session)
+        db.commit()
+    except OperationalError:
+        # Database is down or timed out: 503
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The backend database is unavailable."
+        )
+
+
+def delete_expired_sessions(db: Session) -> int:
+    """Deletes every expired UserSession record. Returns the number of sessions deleted."""
+
+    try:
+        result = db.execute(delete(UserSession).where(UserSession.expires_date <= datetime.now(timezone.utc)))
+        db.commit()
+    except OperationalError:
+        # Database is down or timed out: 503
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="The backend database is unavailable."
+        )
+
+    return result.rowcount
