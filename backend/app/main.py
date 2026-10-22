@@ -9,6 +9,7 @@ from .models.UserSession import UserSession
 
 from .schemas.Users import UserLogin, NewUser
 
+from .services.characters import get_user_characters
 from .services.users import (
     login, logout, create_user, setup_default_user, delete_expired_sessions,
     get_current_session, get_current_user,
@@ -68,3 +69,12 @@ def logout_endpoint(user_session: UserSession = Depends(get_current_session), db
     logout(user_session, db)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
+
+
+# --- Characters ---
+
+@app.get("/api/characters/", tags=["Characters"])
+def list_characters_endpoint(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Returns a summary (id and name) of every character owned by the logged in user."""
+
+    return [{"id": character.id, "name": character.name} for character in get_user_characters(user, db)]
