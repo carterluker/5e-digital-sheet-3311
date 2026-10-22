@@ -1,17 +1,13 @@
-from argon2 import PasswordHasher
-
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
 from .db.db import SessionLocal, create_tables, get_db
 
-from .models.User import User
+from .schemas.Users import UserLogin, NewUser
 
 from .services.users import login, create_user, setup_default_user
 
-from sqlalchemy import select
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 app = FastAPI(title="5e Digital Character Sheet")
@@ -33,16 +29,16 @@ def on_startup():
 
 # --- Users and Login ---
 
-@app.get("/api/create_user/{username},{password},{login_after}")
-def create_user_endpoint(username: str, password: str, login_after: bool, db: Session = Depends(get_db)):
-    user = create_user(username, password, db)
+@app.post("/api/create_user/")
+def create_user_endpoint(new_user: NewUser, db: Session = Depends(get_db)):
+    user = create_user(new_user.username, new_user.password, db)
     response = {"username": user.username}
-    if login_after:
-        response["session_token"] = login(username, password, db)
+    if new_user.login_after:
+        response["session_token"] = login(new_user.username, new_user.password, db)
     return response
 
 
-@app.get("/api/login/{username},{password}")
-def login_endpoint(username: str, password: str, db: Session = Depends(get_db)):
-    return {"session_token": login(username, password, db)}
+@app.post("/api/login/")
+def login_endpoint(user_login: UserLogin, db: Session = Depends(get_db)):
+    return {"session_token": login(user_login.username, user_login.password, db)}
 
