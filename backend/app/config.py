@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     session_lifetime_hours: int = 24 * 7
 
     # default_user = None, if you don't want a default user.
-    default_user = {
+    default_user: dict = {
         "username": "BennyTheBengal",
         "password": "VandalsSuck"
     }

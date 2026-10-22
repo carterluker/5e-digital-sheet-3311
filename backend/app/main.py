@@ -4,11 +4,11 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
-from .db.db import create_tables, get_db
+from .db.db import SessionLocal, create_tables, get_db
 
 from .models.User import User
 
-from .services.users import login, create_user
+from .services.users import login, create_user, setup_default_user
 
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
@@ -28,6 +28,8 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup():
     create_tables()
+    with SessionLocal() as db:
+        setup_default_user(db)
 
 # --- Users and Login ---
 
