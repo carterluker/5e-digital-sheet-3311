@@ -37,7 +37,7 @@ def on_startup():
 
 # --- Users and Login ---
 
-@app.post("/api/create_user/", tags=["Users"])
+@app.post("/api/user/create/", tags=["Users"])
 def create_user_endpoint(new_user: NewUser, db: Session = Depends(get_db)):
     """Creates a new user using the provided credentials. Optionally logs the new user in by returning a session token."""
 
@@ -48,21 +48,21 @@ def create_user_endpoint(new_user: NewUser, db: Session = Depends(get_db)):
     return response
 
 
-@app.post("/api/login/", tags=["Users"])
+@app.post("/api/user/login/", tags=["Users"])
 def login_endpoint(user_login: UserLogin, db: Session = Depends(get_db)):
     """Given a username and password, validate the users credentials and return a session token."""
     
     return {"session_token": login(user_login.username, user_login.password, db)}
 
 
-@app.get("/api/me/", tags=["Users"])
+@app.get("/api/user/me/", tags=["Users"])
 def me_endpoint(user: User = Depends(get_current_user)):
     """Returns the user that owns the session token given in the Authorization header."""
 
     return {"username": user.username}
 
 
-@app.post("/api/logout/", status_code=status.HTTP_204_NO_CONTENT, tags=["Users"])
+@app.post("/api/user/logout/", status_code=status.HTTP_204_NO_CONTENT, tags=["Users"])
 def logout_endpoint(user_session: UserSession = Depends(get_current_session), db: Session = Depends(get_db)):
     """Ends the session given in the Authorization header."""
 

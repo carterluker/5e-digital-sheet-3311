@@ -46,7 +46,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     // (e.g. the database being down) keep the cookie so the user isn't logged out by an outage.
     async function loadUser(sessionToken: string) {
         try {
-            const response = await authFetch(sessionToken, '/api/me/')
+            const response = await authFetch(sessionToken, '/api/user/me/')
             if (response.ok) {
                 const data = await response.json()
                 setToken(sessionToken)
@@ -84,12 +84,12 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     }
 
     async function login(username: string, password: string) {
-        const data = await post('/api/login/', { username, password })
+        const data = await post('/api/user/login/', { username, password })
         await startSession(data.session_token)
     }
 
     async function createUser(username: string, password: string) {
-        const data = await post('/api/create_user/', { username, password, login_after: true })
+        const data = await post('/api/user/create/', { username, password, login_after: true })
         await startSession(data.session_token)
     }
 
@@ -102,7 +102,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         if (current) {
             // Best effort: the session is already gone locally either way.
             try {
-                await authFetch(current, '/api/logout/', { method: 'POST' })
+                await authFetch(current, '/api/user/logout/', { method: 'POST' })
             } catch {
                 // Ignore; the server expires the session on its own.
             }
