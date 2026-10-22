@@ -18,7 +18,7 @@ function LoginPage() {
     const [error, setError] = useState<string | null>(null)
     const [pending, setPending] = useState(false)
 
-    // Already logged in (existing session cookie or just authenticated).
+    // Check if already logged in (existing session cookie or just authenticated).
     useEffect(() => {
         if (token) {
             navigate('/characters', { replace: true })
@@ -32,6 +32,7 @@ function LoginPage() {
         try {
             await (creating ? createUser : login)(username, password)
         } catch (err) {
+            // Maybe add more verbose errors?
             setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
         } finally {
             setPending(false)
