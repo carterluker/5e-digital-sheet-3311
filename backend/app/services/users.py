@@ -4,11 +4,10 @@ from datetime import datetime, timedelta, timezone
 
 from argon2 import PasswordHasher
 
-from fastapi import Depends, FastAPI, HTTPException, status
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Depends, HTTPException, status
 
 from ..config import settings
-from ..db.db import create_tables, get_db
+from ..db.db import get_db
 
 from ..models.User import User
 from ..models.UserSession import UserSession
@@ -79,6 +78,24 @@ def create_user(username: str, password: str, db: Session = Depends(get_db)) -> 
         )
 
     return user
+
+
+def setup_default_user(db: Session) -> None:
+    """Creates the default user from settings.default_user. Does nothing if the setting is missing or None, or if the user already exists."""
+
+    default_user = getattr(settings, "default_user", None)
+    if default_user is None:
+        return
+
+    if get_user(default_user["username"], db) is not None:
+        return
+
+    try:
+        create_user(default_user["username"], default_user["password"], db)
+    except HTTPException as e:
+        # Another worker may have created the default user after the check above.
+        if e.status_code != status.HTTP_409_CONFLICT:
+            raise
 
 
 def update_user_password_hash(username: str, password: str, db: Session = Depends(get_db)) -> None:
