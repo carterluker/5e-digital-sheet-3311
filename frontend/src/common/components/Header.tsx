@@ -13,12 +13,8 @@ function Header() {
 
     return(
         <header>
-            <h1>Carter's Digital Character Sheet</h1>
+            <h1>5.5e Digital Character Sheet</h1>
             <nav>
-                <ul>
-                    <li><a href="">Home</a></li>
-                    <li><a href="">About</a></li>
-                </ul>
             </nav>
             {status === 'authenticated' && (
                 <p>
