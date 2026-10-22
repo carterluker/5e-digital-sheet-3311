@@ -14,21 +14,6 @@
     gap: 16px;
 }
 
-.form-field {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.form-field input {
-    padding: 8px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    font: inherit;
-    color: var(--text-h);
-    background: var(--bg);
-}
-
 .login button {
     padding: 8px 12px;
     border: 1px solid var(--accent);
@@ -48,9 +33,4 @@
     border: none;
     color: var(--accent);
     text-decoration: underline;
-}
-
-.form-error {
-    margin: 0;
-    color: #c0392b;
 }

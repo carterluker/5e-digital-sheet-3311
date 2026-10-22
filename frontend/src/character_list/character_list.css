@@ -25,3 +25,7 @@
 .character-list-item a:hover {
     border-color: var(--accent);
 }
+
+.characters > .button {
+    margin-bottom: 16px;
+}

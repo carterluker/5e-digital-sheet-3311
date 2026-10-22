@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router'
 
 import { authFetch } from '../login/api.ts'
 import { useSession } from '../login/SessionContext.tsx'
@@ -45,6 +46,7 @@ function CharacterListPage() {
         <main>
             <div className="characters">
                 <h2>Your characters</h2>
+                <Link to="/characters/new" className="button">Create character</Link>
                 {error && <p className="form-error" role="alert">{error}</p>}
                 {!error && characters === null && <p>Loading...</p>}
                 {characters !== null && <CharacterList characters={characters} />}
