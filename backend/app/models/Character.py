@@ -1,13 +1,16 @@
 from .ModelBase import ModelBase
 
 from sqlalchemy import DateTime, ForeignKey, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import JSONB
+
+from .User import User
 
 class Character(ModelBase):
 
     __tablename__ = "character"
     id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id", ondelete="CASCADE"), index=True)
     name: Mapped[str] = mapped_column(String(255))
 
     strength: Mapped[int] = mapped_column()
@@ -18,7 +21,10 @@ class Character(ModelBase):
     charisma: Mapped[int] = mapped_column()
 
     selected_skills: Mapped[list] = mapped_column(JSONB)
-    
+
+    # Relationships
+    user: Mapped[User] = relationship()
+
 
 
 
