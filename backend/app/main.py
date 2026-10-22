@@ -31,15 +31,16 @@ def on_startup():
 
 # --- Users and Login ---
 
-@app.get("/api/create_user/{username},{password},{login}")
-async def create_user(username: str, password: str, login: bool, db: Session = Depends(get_db)):
-    create_user(username, password)
-    if login:
-        
+@app.get("/api/create_user/{username},{password},{login_after}")
+def create_user_endpoint(username: str, password: str, login_after: bool, db: Session = Depends(get_db)):
+    user = create_user(username, password, db)
+    response = {"username": user.username}
+    if login_after:
+        response["session_token"] = login(username, password, db)
+    return response
 
 
 @app.get("/api/login/{username},{password}")
-async def login(username: str, password: str):
-    session_token = login(username, password)
-    return 
+def login_endpoint(username: str, password: str, db: Session = Depends(get_db)):
+    return {"session_token": login(username, password, db)}
 
