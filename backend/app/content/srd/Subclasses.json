@@ -5,5 +5,12 @@
         "description": "A barbarian path that channels rage into frenzied, relentless violence.",
         "source": "SRD 5.2",
         "class_key": "barbarian"
+    },
+    {
+        "key": "evoker",
+        "name": "Evoker",
+        "description": "A wizard school that focuses on sculpting raw magical energy into devastating blasts of fire, lightning, and force.",
+        "source": "SRD 5.2",
+        "class_key": "wizard"
     }
 ]

@@ -16,5 +16,23 @@
             {"option": "A", "items": ["Greataxe", "Handaxe x4", "Explorer's Pack"], "gold": 15},
             {"option": "B", "items": [], "gold": 75}
         ]
+    },
+    {
+        "key": "wizard",
+        "name": "Wizard",
+        "description": "A scholarly magic-user who studies the arcane, recording spells in a spellbook and shaping them with careful preparation.",
+        "source": "SRD 5.2",
+        "hit_die": 6,
+        "primary_abilities": ["intelligence"],
+        "saving_throws": ["intelligence", "wisdom"],
+        "spellcasting_ability": "intelligence",
+        "caster_type": "full",
+        "prepares_spells": true,
+        "subclass_level": 3,
+        "multiclass_prerequisites": {"intelligence": 13},
+        "starting_equipment": [
+            {"option": "A", "items": ["Dagger x2", "Arcane Focus (Quarterstaff)", "Robe", "Spellbook", "Scholar's Pack"], "gold": 5},
+            {"option": "B", "items": [], "gold": 55}
+        ]
     }
 ]
