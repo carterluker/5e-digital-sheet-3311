@@ -29,8 +29,10 @@ def on_startup():
 
 # --- Users and Login ---
 
-@app.post("/api/create_user/")
+@app.post("/api/create_user/", tags=["Users"])
 def create_user_endpoint(new_user: NewUser, db: Session = Depends(get_db)):
+    """Creates a new user using the provided credentials. Optionally logs the new user in by returning a session token."""
+
     user = create_user(new_user.username, new_user.password, db)
     response = {"username": user.username}
     if new_user.login_after:
@@ -38,7 +40,9 @@ def create_user_endpoint(new_user: NewUser, db: Session = Depends(get_db)):
     return response
 
 
-@app.post("/api/login/")
+@app.post("/api/login/", tags=["Users"])
 def login_endpoint(user_login: UserLogin, db: Session = Depends(get_db)):
+    """Given a username and password, validate the users credentials and return a session token."""
+    
     return {"session_token": login(user_login.username, user_login.password, db)}
 
