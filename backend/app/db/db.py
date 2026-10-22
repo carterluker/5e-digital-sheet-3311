@@ -3,6 +3,7 @@ from collections.abc import Iterator
 from ..models.ModelBase import ModelBase
 
 from sqlalchemy import create_engine
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session, sessionmaker
 
 from ..config import settings
@@ -16,7 +17,11 @@ engine = create_engine(
 def create_tables():
     """Creates tables for each model registered under the ModelBase class."""
 
-    ModelBase.metadata.create_all(engine)
+    try:
+        ModelBase.metadata.create_all(engine)
+    except OperationalError:
+        # Database is down or timed out: 503
+        raise TimeoutError("Database connection timed out. Could not create/validate database tables.")
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False)
 
