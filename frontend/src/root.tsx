@@ -1,6 +1,7 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router"
 
 import Header from './common/components/Header.tsx'
+import { SessionProvider } from './login/SessionContext.tsx'
 
 import './index.css'
 
@@ -26,10 +27,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function Root() {
 	return(
-		<div>
-			<Header></Header>
+		<SessionProvider>
+			<div>
+				<Header></Header>
 
-			<Outlet />
-		</div>
+				<Outlet />
+			</div>
+		</SessionProvider>
 	)
 }
