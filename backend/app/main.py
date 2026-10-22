@@ -17,6 +17,7 @@ from .services.character_models import (
     get_backgrounds, get_character_classes, get_feats, get_species, get_spells, get_subclasses,
 )
 from .services.characters import get_user_characters
+from .services.content import load_srd_content
 from .services.users import (
     login, logout, create_user, setup_default_user, delete_expired_sessions,
     get_current_session, get_current_user,
@@ -41,6 +42,7 @@ def on_startup():
     with SessionLocal() as db:
         setup_default_user(db)
         delete_expired_sessions(db)
+        load_srd_content(db)
 
 # --- Users and Login ---
 

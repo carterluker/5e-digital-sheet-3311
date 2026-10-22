@@ -1,0 +1,11 @@
+[
+    {
+        "key": "human",
+        "name": "Human",
+        "description": "Adaptable and ambitious, humans are found in every walk of life.",
+        "source": "SRD 5.2",
+        "size": "Medium or Small",
+        "speed": 30,
+        "creature_type": "Humanoid"
+    }
+]

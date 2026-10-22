@@ -1,0 +1,15 @@
+[
+    {
+        "key": "soldier",
+        "name": "Soldier",
+        "description": "You trained as a fighter in an army, a militia, or a mercenary company.",
+        "source": "SRD 5.2",
+        "ability_options": ["strength", "dexterity", "constitution"],
+        "skill_proficiencies": ["athletics", "intimidation"],
+        "tool_proficiency": "One kind of Gaming Set",
+        "equipment": [
+            {"option": "A", "items": ["Spear", "Shortbow", "Arrows x20", "Healer's Kit", "Quiver", "Traveler's Clothes"], "gold": 14},
+            {"option": "B", "items": [], "gold": 50}
+        ]
+    }
+]

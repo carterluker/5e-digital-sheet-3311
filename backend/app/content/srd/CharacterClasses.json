@@ -1,0 +1,20 @@
+[
+    {
+        "key": "barbarian",
+        "name": "Barbarian",
+        "description": "A fierce warrior driven by primal rage, who fights with raw strength and shrugs off blows that would fell others.",
+        "source": "SRD 5.2",
+        "hit_die": 12,
+        "primary_abilities": ["strength"],
+        "saving_throws": ["strength", "constitution"],
+        "spellcasting_ability": null,
+        "caster_type": "none",
+        "prepares_spells": false,
+        "subclass_level": 3,
+        "multiclass_prerequisites": {"strength": 13},
+        "starting_equipment": [
+            {"option": "A", "items": ["Greataxe", "Handaxe x4", "Explorer's Pack"], "gold": 15},
+            {"option": "B", "items": [], "gold": 75}
+        ]
+    }
+]

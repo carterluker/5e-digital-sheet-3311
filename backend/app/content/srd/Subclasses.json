@@ -1,0 +1,9 @@
+[
+    {
+        "key": "path_of_the_berserker",
+        "name": "Path of the Berserker",
+        "description": "A barbarian path that channels rage into frenzied, relentless violence.",
+        "source": "SRD 5.2",
+        "class_key": "barbarian"
+    }
+]
