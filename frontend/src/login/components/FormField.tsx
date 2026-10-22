@@ -5,11 +5,12 @@ interface FormFieldProps {
     autoComplete?: string
     minLength?: number
     maxLength?: number
+    required?: boolean
     value: string
     onChange: (value: string) => void
 }
 
-function FormField({ id, label, type = 'text', autoComplete, minLength, maxLength, value, onChange }: FormFieldProps) {
+function FormField({ id, label, type = 'text', autoComplete, minLength, maxLength, required = true, value, onChange }: FormFieldProps) {
     return (
         <div className="form-field">
             <label htmlFor={id}>{label}</label>
@@ -22,7 +23,7 @@ function FormField({ id, label, type = 'text', autoComplete, minLength, maxLengt
                 maxLength={maxLength}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                required
+                required={required}
             />
         </div>
     )

@@ -4,6 +4,7 @@ import Header from './common/components/Header.tsx'
 import { SessionProvider } from './login/SessionContext.tsx'
 
 import './index.css'
+import './common/forms.css'
 
 export function Layout({ children }: { children: React.ReactNode }) {
 	return(
